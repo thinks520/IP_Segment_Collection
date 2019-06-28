@@ -76,16 +76,15 @@ def Print_SegmentInfo(File_Out,Weight_Value):
     Info_results = c.execute(Print_SQL)
     All_results = Info_results.fetchall()
     file = open(File_Out,"w")
-    print "+------------------+-----+\n| IP段             | 权重|\n+------------------+-----+"
-    file.write("+------------------+-----+\n| IP段             | 权重 |\n+------------------+-----+\n")
+    print("+------------------+-----+\n| IP段             | 权重|\n+------------------+-----+")
     for results in All_results: #遍历符合要求的IP段，将其输出
         results = str(results)
         results_part1 = Get_MiddleStr(results,"(u\'","\', ")
         results_part2 = Get_MiddleStr(results,"\', ",")")
-        file.write("| " + Print_Long(results_part1, 17) + "| " + Print_Long(results_part2, 4) + "|\n")
-        print "| " + Print_Long(results_part1, 17) + "| " + Print_Long(results_part2, 4) + "|"
-    print "+------------------+-----+"
-    file.write("+------------------+-----+")
+        file.write(Print_Long(results_part1, 17) + "\n")
+        print("| " + Print_Long(results_part1, 17) + "| " + Print_Long(results_part2, 4) + "|")
+    print("+------------------+-----+")
+
     file.close()
     conn.commit()
     conn.close()
@@ -110,8 +109,8 @@ if __name__ == '__main__':
     Delete_Database()
     Create_Database()
     Weight_Value = 2 #设置权重值为2，则权重值小于等于2的IP段将不会被输出，提高准确性,可在此修改参数
-    File_In = raw_input("输入域名信息文件路径和名称:")
-    File_Out = raw_input("输入输出结果文件路径和名称:")
+    File_In = "domain.txt"
+    File_Out = "ip.txt"
     File_In = unicode(File_In, "utf8") #支持中文路径
     File_Out = unicode(File_Out, "utf8")
     File_In = File_In.strip()  #去除两边空格
