@@ -4,6 +4,8 @@
 import sys,os
 import sqlite3
 from socket import gethostbyname
+import requests
+import json
 
 """
     企业IP段信息搜集工具 V1.0
@@ -11,6 +13,18 @@ from socket import gethostbyname
     Mon site Internet:https://www.hackinn.com
     Weibo:@Poc-Sir Twitter:@rtcatc GitHub:@rtcatc
 """
+
+def Check_IPSegment(Segment):
+    ip = Segment.split('/')[0]
+    text = requests.get('https://api.ip.sb/geoip/{0}'.format(ip)).text
+    res = json.loads(text)
+    if res.has_key('organization'):
+        if res['organization'].find('Alibaba') != -1:
+            return "aliyun"
+        else:
+            return res['organization']
+    else:
+        return "null"
 
 def Get_IPSegment(IP_Original):
     IP_Final =  IP_Original.split('.')[0] + "." + IP_Original.split('.')[1] +  "." + IP_Original.split('.')[2] + ".0/24"  #将获取到的IP转化为网段
@@ -81,8 +95,10 @@ def Print_SegmentInfo(File_Out,Weight_Value):
         results = str(results)
         results_part1 = Get_MiddleStr(results,"(u\'","\', ")
         results_part2 = Get_MiddleStr(results,"\', ",")")
-        file.write(Print_Long(results_part1, 17) + "\n")
-        print("| " + Print_Long(results_part1, 17) + "| " + Print_Long(results_part2, 4) + "|")
+        ip_org = Check_IPSegment(results_part1)
+        if ip_org != 'null' and ip_org != 'aliyun':
+            file.write(Print_Long(results_part1, 17) + "\n")
+        print("| " + Print_Long(results_part1, 17) + "| " + Print_Long(results_part2, 4) + "|" + ip_org )
     print("+------------------+-----+")
 
     file.close()
@@ -108,7 +124,7 @@ def Delete_Database(): #删除用于临时储存和分析的数据库
 if __name__ == '__main__':
     Delete_Database()
     Create_Database()
-    Weight_Value = 2 #设置权重值为2，则权重值小于等于2的IP段将不会被输出，提高准确性,可在此修改参数
+    Weight_Value = 0 #设置权重值为2，则权重值小于等于2的IP段将不会被输出，提高准确性,可在此修改参数
     File_In = "domain.txt"
     File_Out = "ip.txt"
     File_In = unicode(File_In, "utf8") #支持中文路径
